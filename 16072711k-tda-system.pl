@@ -2,11 +2,11 @@
 % filesystem/4: constructor de filesystem que usa el timestamp, solo lo uso para el RF1
 % name X users X drives X current-user X current-drive Xcurrent-path X logged X elementos X date.
 
-filesystem(Nombre, Users , Drives,  Current-user, Current-drive, Current-path, Logged, Elementos, Date [Nombre,  Users, Drives, Current-user, Current-drive, Current-path, Logged, Elementos, TimeStamp]) :-
+filesystem(Nombre, Users , Drives,  Currentuser, Currentdrive, Currentpath, Logged, Elementos,[Nombre,  Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp]) :-
    get_time(TimeStamp).
 
 % filesystem/5: constructor de filesystem para obtener el timestamp ya creado, lo uso para todo menos RF1
-filesystem(Nombre, Users, Drives, Current-user, Current-drive, Current-path, Logged, Elementos, TimeStamp, [Nombre,Users, Drives, Current-user, Current-Drive, Current-path, Logged, Elementos, TimeStamp]).
+filesystem(Nombre, Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, [Nombre,Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp]).
 
 
 
@@ -17,8 +17,8 @@ getDrives(System, Drives) :-
 
 
 setDrives(System, UpdatedDrives, UpdatedSystem) :-
-   filesystem(Nombre,Users,_, Current-user, Current-drive, Current-path, Logged, Elementos, TimeStamp, System),
-   filesystem(Nombre, Users, UpdatedDrives, Current-user, Current-drive, Current-path, Logged, Elementos, TimeStamp, UpdatedSystem).
+   filesystem(Nombre,Users,_, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, System),
+   filesystem(Nombre, Users, UpdatedDrives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, UpdatedSystem).
 
 
 % Base case: the string exists in the inner list.
@@ -48,8 +48,8 @@ setAddUserInUsers(Users, User, UpdatedUsers) :-
 
 
 setUsers(System, UpdatedUsers, UpdatedSystem) :-
-   filesystem(Nombre, _, Drives, Current-user, Current-drive, Current-path, Logged, Elementos, TimeStamp, System),
-   filesystem(Nombre,  UpdatedUsers, Drives, Current-user, Current-drive, Current-path, Logged, Elementos, TimeStamp, UpdatedSystem).
+   filesystem(Nombre, _, Drives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, System),
+   filesystem(Nombre,  UpdatedUsers, Drives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, UpdatedSystem).
 
 
 setAddUserInSystem(System, User, UpdatedSystem) :-
@@ -73,7 +73,7 @@ setAddNewDriveInDrives(NewDrive, Drives, UpdatedDrives) :-
 %creando la un nuevo sistema con nombre “NewSystem”
 %system("NewSystem", S).
 system(Nombre, Sistema) :-
-   filesystem(Nombre, [], [], "","","","","","", Sistema).
+   filesystem(Nombre, [], [], "","","","",[],Sistema).
 
 
 % RF2. addDrive
@@ -101,5 +101,6 @@ systemAddDrive(System, Unidad, Nombre, Capacidad, UpdatedSystem) :-
 % systemRegister(S2, "user1", S3).
 systemRegister(System, User, UpdatedSystem) :-
    setAddUserInSystem(System, User, UpdatedSystem).
+
 
 
