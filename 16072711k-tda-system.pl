@@ -20,6 +20,14 @@ setDrives(System, UpdatedDrives, UpdatedSystem) :-
    filesystem(Nombre,Users,_, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, System),
    filesystem(Nombre, Users, UpdatedDrives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, UpdatedSystem).
 
+setLogin(System, User, UpdatedSystem) :-
+   filesystem(Nombre,Users, Drives, _, Currentdrive, Currentpath,_ , Elementos, TimeStamp, System),
+   filesystem(Nombre, Users, Drives, User, Currentdrive, Currentpath, 1, Elementos, TimeStamp, UpdatedSystem).
+
+setSwitchDrive(System, Newdrive, UpdatedSystem) :-
+   filesystem(Nombre,Users, Drives, Currentuser, _, _,Logged , Elementos, TimeStamp, System),
+   filesystem(Nombre, Users, Drives, Currentuser, Newdrive, Newdrive, Logged, Elementos, TimeStamp, UpdatedSystem).
+
 
 % Base case: the string exists in the inner list.
 exists(Elemento, [ListaInterna|_]) :-
@@ -38,6 +46,9 @@ letterDoesntExistsInSystem(Unidad, System) :-
 getUsers(System, Users) :-
    filesystem(_, Users, _, _, _, _ , _, _ , _, System).
 
+
+getLogged(System, Logged) :-
+   filesystem(_, _, _, _, _, _ , Logged, _ , _, System).
 
 setAddUserInUsers(Users, User, UpdatedUsers) :-
    append(Users, [User], UpdatedUsers).
@@ -101,6 +112,61 @@ systemAddDrive(System, Unidad, Nombre, Capacidad, UpdatedSystem) :-
 % systemRegister(S2, "user1", S3).
 systemRegister(System, User, UpdatedSystem) :-
    setAddUserInSystem(System, User, UpdatedSystem).
+
+
+
+systemLogin(System, User, UpdatedSystem) :-
+    getUsers(System, Users),
+    existsUser(User,Users),
+    setLogin(System, User, UpdatedSystem).
+
+
+%systemSwitchDrive(S5, "C", S6),
+ systemSwitchDrive(System, Drive, UpdatedSystem) :-
+    getLogged(System, Logged),
+    Logged is 1,
+    setSwitchDrive(System, Drive, UpdatedSystem).
+
+%systemMkdir(S6, "folder1", S7), 
+systemMkdir(System, Folder, Updatedsystem) :-
+    getUserLogged(System, Userlogged),
+    getCurrentDrive(System, Currentdrive),
+    getCurrentPath(System, Currentpath),
+    folder(Folder, Userlogged, Currentdrive, Currentpath, Newelemento),
+	getElementos(System, Currentelementos),
+	setNewFolderinElementos(Newelemento, Currentelementos, Updatedelementos),
+    setElemento(System, Updatedelementos, Updatedsystem).
+
+getElementos(System, Currentelementos) :-
+    filesystem(_, _, _, _, _, _, _,  Currentelementos,_, System).
+    
+setNewFolderinElementos(Newelemento, Currentelementos, UpdatedElementos) :-
+   append(Currentelementos, [Newelemento], UpdatedElementos).
+
+setElemento(System, UpdatedElementos, UpdatedSystem) :-
+   filesystem(Nombre,Users,Drives, Currentuser, Currentdrive, Currentpath, Logged, _, TimeStamp, System),
+   filesystem(Nombre, Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, UpdatedElementos, TimeStamp, UpdatedSystem).
+
+
+folder(Folder,Userlogged, Currentdrive, Currentpath,[Folder, Userlogged, Currentdrive, Currentpath]).
+
+
+% name X users X drives X current-user X current-drive X current-path X logged X elementos X date.    
+ getUserLogged(System, Userlogged) :-
+    filesystem(_, _, _, Userlogged, _, _, _, _, _, System).
+
+ getCurrentDrive(System, Currentdrive) :-
+    filesystem(_, _, _, _, Currentdrive, _, _, _, _, System).
+
+ getCurrentPath(System, Currentpath) :-
+    filesystem(_, _, _, _, _, Currentpath, _, _, _, System).
+
+systemLogout(System, User, UpdatedSystem) :-
+    getUsers(System, Users),
+    existsUser(User,Users),
+    setLogin(System, User, UpdatedSystem).
+    
+
 
 
 
