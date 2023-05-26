@@ -161,12 +161,38 @@ folder(Folder,Userlogged, Currentdrive, Currentpath,[Folder, Userlogged, Current
  getCurrentPath(System, Currentpath) :-
     filesystem(_, _, _, _, _, Currentpath, _, _, _, System).
 
+%systemCd(S8, "folder1", S9),  utilizando dos puntos
+systemCd(System, Target, UpdatedSystem) :-
+    es_igual(Target, ".."),
+    write('Es   correcto  con ..').
+
+%systemCd(S8, "folder1", S9),  utilizando Salash
+systemCd(System, Target, UpdatedSystem) :-
+    es_igual(Target, "/"),
+    write('Es   correcto  con /////').
+
+%systemCd(S8, "folder1", S9),  utilizando cualquier cosa menos dospuntos y salash
+systemCd(System, Target, UpdatedSystem) :-
+    es_distinto(Target, ".."),
+    es_distinto(Target, "/"),
+    getElementos(System, Currentelementos),
+    exists(Target, Currentelementos),
+    setCurrentPath(System, Target, UpdatedSystem),
+    write(Target),
+    write('Es   correcto  con cualquier otro').
+
+setCurrentPath(System, NewCurrentPath, UpdatedSystem) :-
+   filesystem(Nombre,Users,Drives, Currentuser, Currentdrive, _, Logged, Elementos, TimeStamp, System),
+   filesystem(Nombre, Users, Drives, Currentuser, Currentdrive, NewCurrentPath, Logged, Elementos, TimeStamp, UpdatedSystem).
+	
+es_igual(X, Y) :- 
+    X = Y.
+
+es_distinto(X, Y) :- 
+    X \= Y.
+
+
 systemLogout(System, User, UpdatedSystem) :-
     getUsers(System, Users),
     existsUser(User,Users),
     setLogin(System, User, UpdatedSystem).
-    
-
-
-
-
