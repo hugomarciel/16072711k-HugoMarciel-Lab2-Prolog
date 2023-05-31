@@ -21,8 +21,8 @@ setDrives(System, UpdatedDrives, UpdatedSystem) :-
    filesystem(Nombre, Users, UpdatedDrives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, UpdatedSystem).
 
 setLogin(System, User, UpdatedSystem) :-
-   filesystem(Nombre,Users, Drives, _, Currentdrive, Currentpath,_ , Elementos, TimeStamp, System),
-   filesystem(Nombre, Users, Drives, User, Currentdrive, Currentpath, 1, Elementos, TimeStamp, UpdatedSystem).
+   filesystem(Nombre,Users, Drives, _, _, _,_ , Elementos, TimeStamp, System),
+   filesystem(Nombre, Users, Drives, User, "C", "C", 1, Elementos, TimeStamp, UpdatedSystem).
 
 setSwitchDrive(System, Newdrive, UpdatedSystem) :-
    filesystem(Nombre,Users, Drives, Currentuser, _, _,Logged , Elementos, TimeStamp, System),
@@ -134,13 +134,13 @@ systemMkdir(System, Folder, Updatedsystem) :-
     getCurrentPath(System, Currentpath),
     folder(Folder, Userlogged, Currentdrive, Currentpath, Newelemento),
 	getElementos(System, Currentelementos),
-	setNewFolderinElementos(Newelemento, Currentelementos, Updatedelementos),
+	setNewElementoinElementos(Newelemento, Currentelementos, Updatedelementos),
     setElemento(System, Updatedelementos, Updatedsystem).
 
 getElementos(System, Currentelementos) :-
     filesystem(_, _, _, _, _, _, _,  Currentelementos,_, System).
     
-setNewFolderinElementos(Newelemento, Currentelementos, UpdatedElementos) :-
+setNewElementoinElementos(Newelemento, Currentelementos, UpdatedElementos) :-
    append(Currentelementos, [Newelemento], UpdatedElementos).
 
 setElemento(System, UpdatedElementos, UpdatedSystem) :-
@@ -175,11 +175,37 @@ systemCd(System, Target, UpdatedSystem) :-
 systemCd(System, Target, UpdatedSystem) :-
     es_distinto(Target, ".."),
     es_distinto(Target, "/"),
+    esPrimeroDistinto(Target,/),
     getElementos(System, Currentelementos),
     exists(Target, Currentelementos),
-    setCurrentPath(System, Target, UpdatedSystem),
-    write(Target),
-    write('Es   correcto  con cualquier otro').
+    setCurrentPath(System, Target, UpdatedSystem).
+    
+
+   
+systemCd(System, Target, UpdatedSystem):- 
+	esPrimeroIgual(Target, /),
+	eliminarPrimero(Target, NewTarget),
+    getElementos(System, Currentelementos),
+    toString(NewTarget, SNewTarget),
+    exists(SNewTarget, Currentelementos),
+    setCurrentPath(System, SNewTarget, UpdatedSystem).
+
+toString(Atom, String) :-
+    atom_string(Atom, String).
+
+% Regla para eliminar el primer carácter de un string
+eliminarPrimero(Target, NewTarget) :-
+    sub_atom(Target, 1, _, 0, NewTarget).
+
+esPrimeroDistinto(String, Caracter) :-
+    sub_atom(String, 0, 1, _, PrimerCaracter),
+    PrimerCaracter \= Caracter.
+   
+
+esPrimeroIgual(String, Caracter):-
+    sub_atom(String, 0, 1, _, PrimerCaracter),
+    PrimerCaracter = Caracter.
+    
 
 setCurrentPath(System, NewCurrentPath, UpdatedSystem) :-
    filesystem(Nombre,Users,Drives, Currentuser, Currentdrive, _, Logged, Elementos, TimeStamp, System),
@@ -191,8 +217,32 @@ es_igual(X, Y) :-
 es_distinto(X, Y) :- 
     X \= Y.
 
+systemLogout(System, UpdatedSystem) :-
+    getLogged(System, Logged),
+    Logged is 1,
+    setLogout(System, "", UpdatedSystem).
+	
+setLogout(System, User, UpdatedSystem) :-
+   filesystem(Nombre,Users, Drives, _, _, _,_ , Elementos, TimeStamp, System),
+   filesystem(Nombre, Users, Drives, User, "", "", 0, Elementos, TimeStamp, UpdatedSystem).
 
-systemLogout(System, User, UpdatedSystem) :-
-    getUsers(System, Users),
-    existsUser(User,Users),
-    setLogin(System, User, UpdatedSystem).
+
+
+
+
+file(Nombre, Contenido, File) :-
+    makeFile(Nombre, Contenido, File).
+
+makeFile(Nombre, Contenido,[Nombre, Contenido]).
+
+
+systemAddFile(System, F1, UpdatedSystem) :-
+    getUserLogged(System, Userlogged),
+    getCurrentDrive(System, Currentdrive),
+    getCurrentPath(System, Currentpath),
+    append(F1, [Userlogged], UpdatedFile),
+    append(UpdatedFile, [Currentdrive], UpdatedFile2),
+    append(UpdatedFile2, [Currentpath], Newelement),
+    getElementos(System, Currentelementos),
+    setNewElementoinElementos(Newelement, Currentelementos, Updatedelementos),
+    setElemento(System, Updatedelementos, UpdatedSystem).
