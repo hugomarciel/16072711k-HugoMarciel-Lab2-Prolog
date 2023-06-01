@@ -2,31 +2,31 @@
 % filesystem/4: constructor de filesystem que usa el timestamp, solo lo uso para el RF1
 % name X users X drives X current-user X current-drive Xcurrent-path X logged X elementos X date.
 
-filesystem(Nombre, Users , Drives,  Currentuser, Currentdrive, Currentpath, Logged, Elementos,[Nombre,  Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp]) :-
+filesystem(Nombre, Users , Drives,  Currentuser, Currentdrive, Currentpath, Logged, Folders, Files,[Nombre,  Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Folders, Files, TimeStamp]) :-
    get_time(TimeStamp).
 
 % filesystem/5: constructor de filesystem para obtener el timestamp ya creado, lo uso para todo menos RF1
-filesystem(Nombre, Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, [Nombre,Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp]).
+filesystem(Nombre, Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Folders, Files, TimeStamp, [Nombre,Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Folders, Files, TimeStamp]).
 
 
 
 
 getDrives(System, Drives) :-
    % uso el constructor que obtiene el timestamp
-   filesystem(_, _, Drives, _, _, _, _, _, _, System).
+   filesystem(_, _, Drives, _, _, _, _, _, _,_, System).
 
 
 setDrives(System, UpdatedDrives, UpdatedSystem) :-
-   filesystem(Nombre,Users,_, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, System),
-   filesystem(Nombre, Users, UpdatedDrives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, UpdatedSystem).
+   filesystem(Nombre,Users,_, Currentuser, Currentdrive, Currentpath, Logged, Folders, Files, TimeStamp, System),
+   filesystem(Nombre, Users, UpdatedDrives, Currentuser, Currentdrive, Currentpath, Logged, Folders, Files, TimeStamp, UpdatedSystem).
 
 setLogin(System, User, UpdatedSystem) :-
-   filesystem(Nombre,Users, Drives, _, _, _,_ , Elementos, TimeStamp, System),
-   filesystem(Nombre, Users, Drives, User, "C", "C", 1, Elementos, TimeStamp, UpdatedSystem).
+   filesystem(Nombre,Users, Drives, _, _, _,_ , Folders, Files, TimeStamp, System),
+   filesystem(Nombre, Users, Drives, User, "C", "C", 1, Folders, Files, TimeStamp, UpdatedSystem).
 
 setSwitchDrive(System, Newdrive, UpdatedSystem) :-
-   filesystem(Nombre,Users, Drives, Currentuser, _, _,Logged , Elementos, TimeStamp, System),
-   filesystem(Nombre, Users, Drives, Currentuser, Newdrive, Newdrive, Logged, Elementos, TimeStamp, UpdatedSystem).
+   filesystem(Nombre,Users, Drives, Currentuser, _, _,Logged , Folders, Files, TimeStamp, System),
+   filesystem(Nombre, Users, Drives, Currentuser, Newdrive, Newdrive, Logged, Folders, Files, TimeStamp, UpdatedSystem).
 
 
 % Base case: the string exists in the inner list.
@@ -39,16 +39,16 @@ exists(Elemento, [_|RestoListas]) :-
    exists(Elemento, RestoListas).
   
 letterDoesntExistsInSystem(Unidad, System) :-
-   filesystem(_, _, Drives, _, _, _, _, _, _, System),
+   filesystem(_, _, Drives, _, _, _, _, _, _,_, System),
     \+ exists(Unidad, Drives). %  \+ es not
 
 
 getUsers(System, Users) :-
-   filesystem(_, Users, _, _, _, _ , _, _ , _, System).
+   filesystem(_, Users, _, _, _, _ , _, _ , _,_, System).
 
 
 getLogged(System, Logged) :-
-   filesystem(_, _, _, _, _, _ , Logged, _ , _, System).
+   filesystem(_, _, _, _, _, _ , Logged, _ , _,_, System).
 
 setAddUserInUsers(Users, User, UpdatedUsers) :-
    append(Users, [User], UpdatedUsers).
@@ -59,8 +59,8 @@ setAddUserInUsers(Users, User, UpdatedUsers) :-
 
 
 setUsers(System, UpdatedUsers, UpdatedSystem) :-
-   filesystem(Nombre, _, Drives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, System),
-   filesystem(Nombre,  UpdatedUsers, Drives, Currentuser, Currentdrive, Currentpath, Logged, Elementos, TimeStamp, UpdatedSystem).
+   filesystem(Nombre, _, Drives, Currentuser, Currentdrive, Currentpath, Logged, Folders, Files, TimeStamp, System),
+   filesystem(Nombre,  UpdatedUsers, Drives, Currentuser, Currentdrive, Currentpath, Logged, Folders, Files, TimeStamp, UpdatedSystem).
 
 
 setAddUserInSystem(System, User, UpdatedSystem) :-
@@ -84,7 +84,7 @@ setAddNewDriveInDrives(NewDrive, Drives, UpdatedDrives) :-
 %creando la un nuevo sistema con nombre “NewSystem”
 %system("NewSystem", S).
 system(Nombre, Sistema) :-
-   filesystem(Nombre, [], [], "","","","",[],Sistema).
+   filesystem(Nombre, [], [], "","","","",[],[],Sistema).
 
 
 % RF2. addDrive
@@ -133,19 +133,26 @@ systemMkdir(System, Folder, Updatedsystem) :-
     getCurrentDrive(System, Currentdrive),
     getCurrentPath(System, Currentpath),
     folder(Folder, Userlogged, Currentdrive, Currentpath, Newelemento),
-	getElementos(System, Currentelementos),
-	setNewElementoinElementos(Newelemento, Currentelementos, Updatedelementos),
-    setElemento(System, Updatedelementos, Updatedsystem).
+	getFolders(System, CurrentFolders),
+	setNewElementoinElementos(Newelemento, CurrentFolders, UpdatedFolders),
+    setFolder(System, UpdatedFolders, Updatedsystem).
 
-getElementos(System, Currentelementos) :-
-    filesystem(_, _, _, _, _, _, _,  Currentelementos,_, System).
+getFolders(System, Currentfolders) :-
+    filesystem(_, _, _, _, _, _, _,  Currentfolders,_,_, System).
+
+getFiles(System, CurrentFiles) :-
+    filesystem(_, _, _, _, _, _, _,  _,CurrentFiles,_, System).
     
 setNewElementoinElementos(Newelemento, Currentelementos, UpdatedElementos) :-
    append(Currentelementos, [Newelemento], UpdatedElementos).
 
-setElemento(System, UpdatedElementos, UpdatedSystem) :-
-   filesystem(Nombre,Users,Drives, Currentuser, Currentdrive, Currentpath, Logged, _, TimeStamp, System),
-   filesystem(Nombre, Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, UpdatedElementos, TimeStamp, UpdatedSystem).
+setFolder(System, UpdatedFolders, UpdatedSystem) :-
+   filesystem(Nombre,Users,Drives, Currentuser, Currentdrive, Currentpath, Logged, _, Files,TimeStamp, System),
+   filesystem(Nombre, Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, UpdatedFolders, Files, TimeStamp, UpdatedSystem).
+
+setFile(System, UpdatedFiles, UpdatedSystem) :-
+   filesystem(Nombre,Users,Drives, Currentuser, Currentdrive, Currentpath, Logged, Folders, _,TimeStamp, System),
+   filesystem(Nombre, Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Folders, UpdatedFiles, TimeStamp, UpdatedSystem).
 
 
 folder(Folder,Userlogged, Currentdrive, Currentpath,[Folder, Userlogged, Currentdrive, Currentpath]).
@@ -153,13 +160,13 @@ folder(Folder,Userlogged, Currentdrive, Currentpath,[Folder, Userlogged, Current
 
 % name X users X drives X current-user X current-drive X current-path X logged X elementos X date.    
  getUserLogged(System, Userlogged) :-
-    filesystem(_, _, _, Userlogged, _, _, _, _, _, System).
+    filesystem(_, _, _, Userlogged, _, _, _, _, _,_, System).
 
  getCurrentDrive(System, Currentdrive) :-
-    filesystem(_, _, _, _, Currentdrive, _, _, _, _, System).
+    filesystem(_, _, _, _, Currentdrive, _, _, _, _,_, System).
 
  getCurrentPath(System, Currentpath) :-
-    filesystem(_, _, _, _, _, Currentpath, _, _, _, System).
+    filesystem(_, _, _, _, _, Currentpath, _, _, _,_, System).
 
 %systemCd(S8, "folder1", S9),  utilizando dos puntos
 systemCd(System, Target, UpdatedSystem) :-
@@ -176,8 +183,8 @@ systemCd(System, Target, UpdatedSystem) :-
     es_distinto(Target, ".."),
     es_distinto(Target, "/"),
     esPrimeroDistinto(Target,/),
-    getElementos(System, Currentelementos),
-    exists(Target, Currentelementos),
+    getFolders(System, CurrentFolders),
+    exists(Target, CurrentFolders),
     setCurrentPath(System, Target, UpdatedSystem).
     
 
@@ -185,9 +192,9 @@ systemCd(System, Target, UpdatedSystem) :-
 systemCd(System, Target, UpdatedSystem):- 
 	esPrimeroIgual(Target, /),
 	eliminarPrimero(Target, NewTarget),
-    getElementos(System, Currentelementos),
+    getFolders(System, CurrentFolders),
     toString(NewTarget, SNewTarget),
-    exists(SNewTarget, Currentelementos),
+    exists(SNewTarget, CurrentFolders),
     setCurrentPath(System, SNewTarget, UpdatedSystem).
 
 toString(Atom, String) :-
@@ -208,8 +215,8 @@ esPrimeroIgual(String, Caracter):-
     
 
 setCurrentPath(System, NewCurrentPath, UpdatedSystem) :-
-   filesystem(Nombre,Users,Drives, Currentuser, Currentdrive, _, Logged, Elementos, TimeStamp, System),
-   filesystem(Nombre, Users, Drives, Currentuser, Currentdrive, NewCurrentPath, Logged, Elementos, TimeStamp, UpdatedSystem).
+   filesystem(Nombre,Users,Drives, Currentuser, Currentdrive, _, Logged, Folders, Files, TimeStamp, System),
+   filesystem(Nombre, Users, Drives, Currentuser, Currentdrive, NewCurrentPath, Logged, Folders, Files, TimeStamp, UpdatedSystem).
 	
 es_igual(X, Y) :- 
     X = Y.
@@ -223,8 +230,8 @@ systemLogout(System, UpdatedSystem) :-
     setLogout(System, "", UpdatedSystem).
 	
 setLogout(System, User, UpdatedSystem) :-
-   filesystem(Nombre,Users, Drives, _, _, _,_ , Elementos, TimeStamp, System),
-   filesystem(Nombre, Users, Drives, User, "", "", 0, Elementos, TimeStamp, UpdatedSystem).
+   filesystem(Nombre,Users, Drives, _, _, _,_ , Folders,Files, TimeStamp, System),
+   filesystem(Nombre, Users, Drives, User, "", "", 0, Folders, Files, TimeStamp, UpdatedSystem).
 
 
 
@@ -243,6 +250,6 @@ systemAddFile(System, F1, UpdatedSystem) :-
     append(F1, [Userlogged], UpdatedFile),
     append(UpdatedFile, [Currentdrive], UpdatedFile2),
     append(UpdatedFile2, [Currentpath], Newelement),
-    getElementos(System, Currentelementos),
-    setNewElementoinElementos(Newelement, Currentelementos, Updatedelementos),
-    setElemento(System, Updatedelementos, UpdatedSystem).
+    getFiles(System, CurrentFiles),
+    setNewElementoinElementos(Newelement, CurrentFiles, UpdatedFiles),
+    setFile(System, UpdatedFiles, UpdatedSystem).
