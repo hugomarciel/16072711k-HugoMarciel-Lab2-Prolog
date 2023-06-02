@@ -253,3 +253,24 @@ systemAddFile(System, F1, UpdatedSystem) :-
     getFiles(System, CurrentFiles),
     setNewElementoinElementos(Newelement, CurrentFiles, UpdatedFiles),
     setFile(System, UpdatedFiles, UpdatedSystem).
+
+
+systemDel(System, Target, UpdatedSystem):-
+    getFiles(System, CurrentFiles),
+    exists(Target, CurrentFiles),
+    eliminaTarget(Target, CurrentFiles, Resultado),
+    setFile(System, Resultado, UpdatedSystem),
+    write(Resultado).
+    
+    
+    
+eliminaTarget(Target, CurrentFiles, Resultado) :-
+    eliminar_elemento_aux(Target, CurrentFiles, [], Resultado).
+
+eliminar_elemento_aux(_, [], Acumulador, Acumulador).
+
+eliminar_elemento_aux(Target, [[Target|_]|Resto], Acumulador, Resultado) :-
+    eliminar_elemento_aux(Target, Resto, Acumulador, Resultado).
+
+eliminar_elemento_aux(Target, [Cabecera|Resto], Acumulador, Resultado) :-
+    eliminar_elemento_aux(Target, Resto, [Cabecera|Acumulador], Resultado).
