@@ -328,5 +328,28 @@ getDataFromDestiny(Destiny, Drive, Path) :-
     sub_string(Destiny, 3, _, 0, Path).
 
 
-%systemMove(“foo.txt”, “D:/newFolder/”).
-%systemMove(target, Destiny):-
+%systemMove(S17, “foo.txt”, “D:/newFolder/”, S18).
+systemMove(System, Target, Destiny, UpdatedSystem):-
+    getFiles(System, CurrentFiles),
+    existGetContentFile(Target, CurrentFiles, Content),
+    getDataFromDestiny(Destiny, Drive, Path),
+    getUserLogged(System, Userlogged),
+    append([], [Target], UpdatedFile0),
+    append(UpdatedFile0, [Content], UpdatedFile),
+    append(UpdatedFile, [Userlogged], UpdatedFile1),
+    append(UpdatedFile1, [Drive], UpdatedFile2),
+    append(UpdatedFile2, [Path], Newelement),
+    getFiles(System, CurrentFiles),
+    eliminaFileXNombre(Target, CurrentFiles, NewCurrentFiles),
+    setNewElementoinLista(Newelement, NewCurrentFiles, UpdatedFiles),
+    setFile(System, UpdatedFiles, UpdatedSystem).
+
+
+
+eliminaFileXNombre(Target, CurrentFiles, NewCurrentFiles) :-
+    delete(CurrentFiles, [Target, _, _, _, _], NewCurrentFiles).
+
+
+
+%systemRen(S, “foo.txt”, “foo2.jpg”, S2).
+systemRen(S, Target, Out, UpdatedSystem ) :-
