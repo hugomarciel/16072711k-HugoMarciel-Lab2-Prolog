@@ -22,11 +22,12 @@ setDrives(System, UpdatedDrives, UpdatedSystem) :-
 
 setLogin(System, User, UpdatedSystem) :-
    filesystem(Nombre,Users, Drives, _, _, _,_ , Folders, Files, TimeStamp, System),
-   filesystem(Nombre, Users, Drives, User, "C", "C", 1, Folders, Files, TimeStamp, UpdatedSystem).
+   filesystem(Nombre, Users, Drives, User, "C:/", "C:/", 1, Folders, Files, TimeStamp, UpdatedSystem).
 
 setSwitchDrive(System, Newdrive, UpdatedSystem) :-
+   driveFormat(Newdrive, NewDriveFormat),
    filesystem(Nombre,Users, Drives, Currentuser, _, _,Logged , Folders, Files, TimeStamp, System),
-   filesystem(Nombre, Users, Drives, Currentuser, Newdrive, Newdrive, Logged, Folders, Files, TimeStamp, UpdatedSystem).
+   filesystem(Nombre, Users, Drives, Currentuser, NewDriveFormat, NewDriveFormat, Logged, Folders, Files, TimeStamp, UpdatedSystem).
 
 
 % Base case: the string exists in the inner list.
@@ -98,10 +99,29 @@ system(Nombre, Sistema) :-
 
 systemAddDrive(System, Unidad, Nombre, Capacidad, UpdatedSystem) :-
    letterDoesntExistsInSystem(Unidad, System), % Verifico que no existe un drive con la misma letra
-   drive(Unidad, Nombre, Capacidad, NewDrive),
+   driveFormat(Unidad, NewUnit),
+   drive(NewUnit, Nombre, Capacidad, NewDrive),
    getDrives(System, CurrentDrives),
    setAddNewDriveInDrives(NewDrive, CurrentDrives, UpdatedDrives),
    setDrives(System, UpdatedDrives, UpdatedSystem).
+
+
+driveFormat(Drive, NewDrive) :-
+    string_length(Drive, 1),
+    string_concat(Drive, ":/", NewDrive).
+    
+driveFormat(Drive, NewDrive) :-
+    string_length(Drive, 3),
+    NewDrive = Drive.
+
+
+    
+    %write("Se entra"),
+    %string_concat(Drive, ":/", NewDriveWithSlash),
+    %write(NewDriveWithSlash),
+    %string_concat(NewDriveWithSlash, _, NewDrive),
+    %write(NewDrive).
+    
 
 
 % RF 3. register
@@ -134,7 +154,7 @@ systemMkdir(System, Folder, Updatedsystem) :-
     getCurrentPath(System, Currentpath),
     folder(Folder, Userlogged, Currentdrive, Currentpath, Newelemento),
 	getFolders(System, CurrentFolders),
-	setNewElementoinElementos(Newelemento, CurrentFolders, UpdatedFolders),
+	setNewElementoinLista(Newelemento, CurrentFolders, UpdatedFolders),
     setFolder(System, UpdatedFolders, Updatedsystem).
 
 getFolders(System, Currentfolders) :-
@@ -143,7 +163,7 @@ getFolders(System, Currentfolders) :-
 getFiles(System, CurrentFiles) :-
     filesystem(_, _, _, _, _, _, _,  _,CurrentFiles,_, System).
     
-setNewElementoinElementos(Newelemento, Currentelementos, UpdatedElementos) :-
+setNewElementoinLista(Newelemento, Currentelementos, UpdatedElementos) :-
    append(Currentelementos, [Newelemento], UpdatedElementos).
 
 setFolder(System, UpdatedFolders, UpdatedSystem) :-
@@ -251,7 +271,7 @@ systemAddFile(System, F1, UpdatedSystem) :-
     append(UpdatedFile, [Currentdrive], UpdatedFile2),
     append(UpdatedFile2, [Currentpath], Newelement),
     getFiles(System, CurrentFiles),
-    setNewElementoinElementos(Newelement, CurrentFiles, UpdatedFiles),
+    setNewElementoinLista(Newelement, CurrentFiles, UpdatedFiles),
     setFile(System, UpdatedFiles, UpdatedSystem).
 
 
@@ -259,8 +279,7 @@ systemDel(System, Target, UpdatedSystem):-
     getFiles(System, CurrentFiles),
     exists(Target, CurrentFiles),
     eliminaTarget(Target, CurrentFiles, Resultado),
-    setFile(System, Resultado, UpdatedSystem),
-    write(Resultado).
+    setFile(System, Resultado, UpdatedSystem).
     
     
     
@@ -274,3 +293,40 @@ eliminar_elemento_aux(Target, [[Target|_]|Resto], Acumulador, Resultado) :-
 
 eliminar_elemento_aux(Target, [Cabecera|Resto], Acumulador, Resultado) :-
     eliminar_elemento_aux(Target, Resto, [Cabecera|Acumulador], Resultado).
+
+
+
+% copia el archivo foo.txt a la ruta D:/newFolder/
+%systemCopy(S, “foo.txt”, “D:/newFolder/”, S1).
+systemCopy(System, Target, Destiny, UpdatedSystem):-
+    getFiles(System, CurrentFiles),
+    existGetContentFile(Target, CurrentFiles, Content),
+    getDataFromDestiny(Destiny, Drive, Path),
+    getUserLogged(System, Userlogged),
+    append([], [Target], UpdatedFile0),
+    append(UpdatedFile0, [Content], UpdatedFile),
+    append(UpdatedFile, [Userlogged], UpdatedFile1),
+    append(UpdatedFile1, [Drive], UpdatedFile2),
+    append(UpdatedFile2, [Path], Newelement),
+    getFiles(System, CurrentFiles),
+    setNewElementoinLista(Newelement, CurrentFiles, UpdatedFiles),
+    setFile(System, UpdatedFiles, UpdatedSystem).
+
+ existGetContentFile(Target, CurrentFiles, Content) :-
+    existGetContentFileHelper(Target, CurrentFiles, Content).
+
+existGetContentFileHelper(Target, [[Nombre, Contenido, _, _, _] | _], Content) :-
+    Nombre = Target,
+    atom_string(Contenido, Content).
+
+existGetContentFileHelper(Target, [_ | Rest], Content) :-
+    existGetContentFileHelper(Target, Rest, Content).
+
+
+getDataFromDestiny(Destiny, Drive, Path) :-
+    sub_string(Destiny, 0, 3, _, Drive),
+    sub_string(Destiny, 3, _, 0, Path).
+
+
+%systemMove(“foo.txt”, “D:/newFolder/”).
+%systemMove(target, Destiny):-
