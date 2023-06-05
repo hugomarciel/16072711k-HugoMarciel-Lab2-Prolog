@@ -523,12 +523,6 @@ systemRen(System, Target, New, UpdatedSystem ):-
     setNewElementoinLista(Newelement, NewCurrentFiles, UpdatedFiles),
     setFile(System, UpdatedFiles, UpdatedSystem).
 
-
-
-
-
-
-
 systemDir(System, Lista, Str) :-
     length(Lista, 0),
     getElementos(System,CurrentDrive, CurrentUser,CurrentPath, Folders, Files),
@@ -538,7 +532,7 @@ systemDir(System, Lista, Str) :-
     write(Files).
 
 
-%systemCd(S8, "folder1", S9),  utilizando dos puntos
+    %systemCd(S8, "folder1", S9),  utilizando dos puntos
 systemCd(System, Target, UpdatedSystem) :-
     es_igual(Target, ".."),
     write('Es   correcto  con ..').
@@ -547,12 +541,6 @@ systemCd(System, Target, UpdatedSystem) :-
 systemCd(System, Target, UpdatedSystem) :-
     es_igual(Target, "/"),
     write('Es   correcto  con /////').
-
-
-
-
-
-
 
 % Descripción: Cambia el directorio actual del sistema a la ruta especificada.
 % Meta Principal: System, Target, UpdatedSystem
