@@ -1,6 +1,6 @@
 % TDA FS
 % filesystem/4: constructor de filesystem que usa el timestamp, solo lo uso para el RF1
-% name X users X drives X current-user X current-drive Xcurrent-path X logged X elementos X date.
+% name X users X drives X current-user X current-drive Xcurrent-path X logged X folders X Files X date.
 
 filesystem(Nombre, Users , Drives,  Currentuser, Currentdrive, Currentpath, Logged, Folders, Files,[Nombre,  Users, Drives, Currentuser, Currentdrive, Currentpath, Logged, Folders, Files, TimeStamp]) :-
    get_time(TimeStamp).
@@ -159,6 +159,14 @@ systemMkdir(System, Folder, Updatedsystem) :-
 
 getFolders(System, Currentfolders) :-
     filesystem(_, _, _, _, _, _, _,  Currentfolders,_,_, System).
+
+
+%name X users X drives X current-user X current-drive Xcurrent-path X logged X folders X Files X date.
+getPath(System, CurrentPath) :-
+    filesystem(_, _, _, _, _, CurrentPath, _, _,_,_, System).
+
+getDrive(System, CurrentDrive) :-
+    filesystem(_, _, _, _, CurrentDrive, _, _, _,_,_, System).
 
 getFiles(System, CurrentFiles) :-
     filesystem(_, _, _, _, _, _, _,  _,CurrentFiles,_, System).
@@ -339,7 +347,7 @@ systemMove(System, Target, Destiny, UpdatedSystem):-
     append(UpdatedFile, [Userlogged], UpdatedFile1),
     append(UpdatedFile1, [Drive], UpdatedFile2),
     append(UpdatedFile2, [Path], Newelement),
-    getFiles(System, CurrentFiles),
+    %getFiles(System, CurrentFiles),
     eliminaFileXNombre(Target, CurrentFiles, NewCurrentFiles),
     setNewElementoinLista(Newelement, NewCurrentFiles, UpdatedFiles),
     setFile(System, UpdatedFiles, UpdatedSystem).
@@ -352,4 +360,30 @@ eliminaFileXNombre(Target, CurrentFiles, NewCurrentFiles) :-
 
 
 %systemRen(S, “foo.txt”, “foo2.jpg”, S2).
-systemRen(S, Target, Out, UpdatedSystem ) :-
+systemRen(System, Target, New, UpdatedSystem ):-
+    getFiles(System, CurrentFiles),
+    existGetContentFile(Target, CurrentFiles, Content),
+    getDrive(System, Drive),
+    getPath(System, Path),
+    getUserLogged(System, Userlogged),
+    append([], [New], UpdatedFile0),
+    append(UpdatedFile0, [Content], UpdatedFile),
+    append(UpdatedFile, [Userlogged], UpdatedFile1),
+    append(UpdatedFile1, [Drive], UpdatedFile2),
+    append(UpdatedFile2, [Path], Newelement),
+    %getFiles(System, CurrentFiles),
+    eliminaFileXNombre(Target, CurrentFiles, NewCurrentFiles),
+    setNewElementoinLista(Newelement, NewCurrentFiles, UpdatedFiles),
+    setFile(System, UpdatedFiles, UpdatedSystem).
+
+systemDir(System, Lista, Str) :-
+    length(Lista, 0),
+    getElementos(System,CurrentDrive, CurrentUser,CurrentPath, Folders, Files),
+    filterXUDP(CurrentUser,CurrentDrive, CurrentPath, Folders, filteredFolders),
+    write("Estos son los drivesn/"),
+    write(Folders),
+    write(Files).
+
+% name X users X drives X current-user X current-drive Xcurrent-path X logged X folders X Files X date.
+getElementos(System,CurrentDrive, CurrentUser,CurrentPath, Folders, Files) :-
+    filesystem(_, _, _, CurrentUser, CurrentDrive, CurrentPath, _,  Folders,Files,_, System).
